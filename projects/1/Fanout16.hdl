@@ -1,0 +1,30 @@
+// A helper chip for the project
+// File name: projects/1/Fanout16.hdl
+/**
+ * 16-bit Fanout gate:
+ * takes a single bit input
+ * produces 16 identical outputs
+ * out[i] = in for i=0,1,2,...,15
+ */
+CHIP Fanout16 {
+    IN in;
+    OUT out[16];
+
+    PARTS:
+    Identity(in=in, out=out[0]);
+    Identity(in=in, out=out[1]);
+    Identity(in=in, out=out[2]);
+    Identity(in=in, out=out[3]);
+    Identity(in=in, out=out[4]);
+    Identity(in=in, out=out[5]);
+    Identity(in=in, out=out[6]);
+    Identity(in=in, out=out[7]);
+    Identity(in=in, out=out[8]);
+    Identity(in=in, out=out[9]);
+    Identity(in=in, out=out[10]);
+    Identity(in=in, out=out[11]);
+    Identity(in=in, out=out[12]);
+    Identity(in=in, out=out[13]);
+    Identity(in=in, out=out[14]);
+    Identity(in=in, out=out[15]);
+}

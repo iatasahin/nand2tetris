@@ -11,5 +11,7 @@ CHIP And {
     OUT out;
     
     PARTS:
-    //// Replace this comment with your code.
+    // out = And(a,b) = !(!(a & b)) = a & b
+    Nand(a=a, b=b, out=nandAB);
+    Not(in=nandAB, out=out);
 }

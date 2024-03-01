@@ -12,5 +12,10 @@ CHIP Mux16 {
     OUT out[16];
 
     PARTS:
-    //// Replace this comment with your code.
+    // out = sel & b | !sel & a
+    Fanout16(in=sel, out=sel16);
+    Not16(in=sel16, out=notsel16);
+    And16(a=sel16, b=b, out=selb);
+    And16(a=notsel16, b=a, out=notsela);
+    Or16(a=selb, b=notsela, out=out);
 }
