@@ -1,0 +1,19 @@
+// A helper chip for the project
+// File name: projects/2/Xor16.hdl
+/**
+ * 16-bit Exclusive-or gate:
+ * for i = 0, ..., 15:
+ * out[i] = a[i] ^ b[i]
+ */
+CHIP Xor16 {
+     IN a[16], b[16];
+     OUT out[16];
+
+     PARTS:
+     // out = Xor(a,b) =  (a & !b) | (!a & b) = a ^ b
+     Not16(in=a, out=nota);
+     Not16(in=b, out=notb);
+     And16(a=a, b=notb, out=aAndNotb);
+     And16(a=nota, b=b, out=notaAndb);
+     Or16(a=aAndNotb, b=notaAndb, out=out);
+}

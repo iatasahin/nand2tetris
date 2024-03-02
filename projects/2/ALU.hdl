@@ -41,5 +41,40 @@ CHIP ALU {
         ng;      // if (out < 0)  equals 1, else 0
 
     PARTS:
-    //// Replace this comment with your code.
+    // if (zx == 1) sets x = 0
+    Fanout16(in=zx, out=zx16);
+    Not16(in=zx16, out=nzx16);
+    And16(a=nzx16, b=x, out=x2);
+
+    // if (nx == 1) sets x = !x
+    Fanout16(in=nx, out=nx16);
+    Xor16(a=nx16, b=x2, out=x3);
+
+    // if (zy == 1) sets y = 0
+    Fanout16(in=zy, out=zy16);
+    Not16(in=zy16, out=nzy16);
+    And16(a=nzy16, b=y, out=y2);
+
+    // if (ny == 1) sets y = !y
+    Fanout16(in=ny, out=ny16);
+    Xor16(a=ny16, b=y2, out=y3);
+
+    // if (f == 1)  sets out = x + y
+    Add16(a=x3, b=y3, out=x3PlusY3);
+    // if (f == 0)  sets out = x & y
+    And16(a=x3, b=y3, out=x3AndY3);
+    // selection based on f
+    Mux16(a=x3AndY3, b=x3PlusY3, sel=f, out=XYAddedOrAnded);
+
+    // if (no == 1) sets out = !out
+    Fanout16(in=no, out=no16);
+    Xor16(a=no16, b=XYAddedOrAnded, out=out);
+
+    Xor16(a=no16, b=XYAddedOrAnded, out=outCopy);
+    // if (out == 0) sets zr = 1, else 0
+    Or16Way(in=outCopy, out=notZR);
+    Not(in=notZR, out=zr);
+
+    // if (out < 0) sets ng = 1, else 0
+    SignIsNegative16(in=outCopy, out=ng);
 }

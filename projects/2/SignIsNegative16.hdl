@@ -1,0 +1,13 @@
+// A helper chip for the project
+// File name: projects/2/SignIsNegative16.hdl
+/**
+ * The Sign bit of a 16 bit integer.
+ * out = in[15]
+ */
+ CHIP SignIsNegative16 {
+     IN in[16];
+     OUT out;
+
+     PARTS:
+     Identity(in=in[15], out=out);
+ }

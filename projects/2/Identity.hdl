@@ -1,0 +1,14 @@
+// A helper chip for the project
+// File name: projects/2/Identity.hdl
+/**
+ * 1-bit Identity gate:
+ * outputs its input
+ */
+CHIP Identity {
+    IN in;
+    OUT out;
+
+    PARTS:
+    Not(in=in, out=notin);
+    Not(in=notin, out=out);
+}
