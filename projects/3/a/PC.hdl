@@ -10,9 +10,44 @@
  * else              out(t+1) = out(t)
  */
 CHIP PC {
-    IN in(16),inc, load, reset;
-    OUT out(16);
+    IN in[16],inc, load, reset;
+    OUT out[16];
     
     PARTS:
-    //// Replace this comment with your code.
+    // 1) Naive Implementation
+/*
+        if(reset) return false, else
+            if(load) return in, else
+                if(inc) return Inc(out(t-1)), else
+                    return out(t-1)
+*/
+    Register(in=regin, load=true, out=regout, out=out);
+    Inc16(in=regout, out=incremented);
+    Mux16(a=regout, b=incremented, sel=inc, out=incOrSame);
+    Mux16(a=incOrSame, b=in, sel=load, out=inOrIncOrSame);
+    Mux16(a=inOrIncOrSame, b[0..15]=false, sel=reset, out=regin);
+
+    // 2) Mux4Way16 Implementation
+/*
+    reset   load    inc     out
+    0       0       0       out(t-1)
+    1       X       X       00
+    0       1       X       in(t-1)
+    0       0       1       out(t-1) + 1
+    selector bits:
+    3 reset         11      d
+    2 load          10      c
+    1 inc           01      b
+    0               00      a
+    Selector[1] : reset OR load
+    Selector[0] : reset OR (!load AND inc)
+*/
+/*
+    Register(in=regin, load=true, out=regout, out=out);
+    Not(in=load, out=notload);
+    And(a=notload, b=inc, out=notloadAndInc);
+    Or16(a[1]=reset, b[1]=load, a[0]=reset, b[0]=notloadAndInc, out[0..1]=selector);
+    Inc16(in=regout, out=incremented);
+    Mux4Way16(a=regout, b=incremented, c=in, d[0..15]=false, sel=selector, out=regin);
+*/
 }
