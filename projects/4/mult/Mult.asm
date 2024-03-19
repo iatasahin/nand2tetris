@@ -7,4 +7,27 @@
 // (R0, R1, R2 refer to RAM[0], RAM[1], and RAM[2], respectively.)
 // The algorithm is based on repetitive addition.
 
-//// Replace this comment with your code.
+// R2 = 0
+// while R0 > 0
+//   R0 = R0 - 1
+//   R2 = R1 + R2
+
+// R2 = 0
+@2
+M = 0
+
+// while --R0 >= 0
+@0          // address of RAM[O] // this line is addressed by ROM[2]
+MD=M-1      // R0--
+@12     // ROM addressing; address of the first line after the while loop
+D ; JLT     // if(R0<0) break;
+
+// R2=R1+R2
+@1          // address of R1
+D=M         // D=R1
+@2          // address of R2
+M=D+M       // R2=R1+R2
+
+@2      // ROM addressing; address of the first line of the while loop
+0 ; JMP     // goto while
+// this line is addressed by ROM[12]
