@@ -17,8 +17,7 @@
 //   // paint the screen
 //   RAM[0]=2^13 (8192);    // screenMemoryMapStartAddress
 //   do
-//     if(RAM[2])   RAM[RAM[0]]=-1      // fillScreen
-//     else         RAM[RAM[0]]=0       // emptyScreen
+//     RAM[RAM[0]]=RAM[2]       // fillScreen or emptyScreen
 //   while RAM[1] > ++RAM[0]
 
 // RAM[1]=24576
@@ -47,30 +46,19 @@ D=A
 M=D
 
 //   do
-//     if(RAM[2])   RAM[RAM[0]]=-1      // fillScreen
-//     else         RAM[RAM[0]]=0       // emptyScreen
+//     RAM[RAM[0]]=RAM[2]
 //   while RAM[1] > ++RAM[0]
 
 //   do
+//     RAM[RAM[0]]=RAM[2]
 @2          // ROM[17]
 D=M             // D=RAM[2]     // ffff or 0000
-@26         // ROM addressing; goto else statement
-D; JEQ          // if( ! keyPressed) goto innerElse
-
-// if(RAM[2]):
 @0
 A=M             // A=RAM[0]
-M=-1            // RAM[RAM[0]]=ffff     // fill 16 bits of the screen
-@29         // ROM addressing; address of the first line after the else statement
-0; JMP          // break if statement;
-
-// if( ! RAM[2]), innerElse:
-@0          // ROM[26]
-A=M             // A=RAM[0]
-M=0             // RAM[RAM[0]]=0000     // empty 16 bits of the screen
+M=D             // RAM[RAM[0]]=RAM[2]   // fillScreen or emptyScreen
 
 // ++RAM[0]
-@0          // ROM[29]
+@0
 MD=M+1          // increment the index
 
 @1
