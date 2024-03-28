@@ -9,67 +9,72 @@
 // the screen should be cleared.
 
 //// pseudocode:
-// RAM[1]=24576;   // keyboardMemoryMapAddress, also screenMemoryMapEndAddress+1
+// RAM[screenEnd]=SCREEN+8192;
 // while(true){
 //   // keyPressed ? fillScreen : emptyScreen;
-//   if(anyKeyPressed)  RAM[2]=-1;      // RAM[2]=ffff
-//   else               RAM[2]=0;       // RAM[2]=0000
+//   if(anyKeyPressed)  RAM[fillValue]=-1;      // RAM[fillValue]=ffff
+//   else               RAM[fillValue]=0;       // RAM[fillValue]=0000
 //   // paint the screen
-//   RAM[0]=16384;              // screenMemoryMapStartAddress
-//   do
-//     RAM[RAM[0]]=RAM[2]       // fillScreen or emptyScreen
-//   while RAM[1] > ++RAM[0]
+//   RAM[pixelIndex]=SCREEN;                    // screenMemoryMapStartAddress
+//   do {
+//     RAM[RAM[pixelIndex]]=RAM[fillValue];     // fillScreen or emptyScreen
+//   } while(RAM[screenEnd] > ++RAM[pixelIndex]);
+// }
 
-// RAM[1]=24576
-@KBD
+// RAM[screenEnd]=SCREEN+8192;
+@SCREEN
 D=A
-@R1
+@8192
+D=D+A
+@screenEnd
 M=D
 
-// while(true):
-//   if(anyKeyPressed)
+// while(true){
+//   // keyPressed ? fillScreen : emptyScreen;
+//   if(anyKeyPressed)  RAM[fillValue]=-1;      // RAM[fillValue]=ffff
+//   else               RAM[fillValue]=0;       // RAM[fillValue]=0000
 (WHILE)
-@R2
-M=-1            // RAM[2]=ffff  // fillScreen
-@R1
-A=M             // A=RAM[1]: keyboardMemoryMapAddress
-D=M             // D=RAM[RAM[1]]: keyboardScanKeyValue
+@fillValue
+M=-1            // RAM[fillValue]=ffff  // fillScreen
+@KBD
+D=M             // D=RAM[KBD]: keyboardKeyValue
 @AFTERELSE
 D; JNE          // anyKeyPressed is true; skip else statement
 //   else       // if( ! anyKeyPressed)
-@R2
-M=0             // RAM[2]=0000  // emptyScreen
+@fillValue
+M=0             // RAM[fillValue]=0000  // emptyScreen
 
 (AFTERELSE)
-// RAM[0]= 16384
+// RAM[pixelIndex]=SCREEN
 @SCREEN
 D=A
-@R0
+@pixelIndex
 M=D
 
-//   do
-//     RAM[RAM[0]]=RAM[2]
-//   while RAM[1] > ++RAM[0]
+//   do {
+//     RAM[RAM[pixelIndex]]=RAM[fillValue];       // fillScreen or emptyScreen
+//   } while(RAM[screenEnd] > ++RAM[pixelIndex]);
 
 //   do
-//     RAM[RAM[0]]=RAM[2]
+//     RAM[RAM[pixelIndex]]=RAM[fillValue]
 (DOWHILE)
-@R2
-D=M             // D=RAM[2]     // ffff or 0000
-@R0
-A=M             // A=RAM[0]
-M=D             // RAM[RAM[0]]=RAM[2]   // fillScreen or emptyScreen
+@fillValue
+D=M             // D=RAM[fillValue]     // ffff or 0000
+@pixelIndex
+A=M             // A=RAM[pixelIndex]
+M=D             // RAM[RAM[pixelIndex]]=RAM[fillValue]   // fillScreen or emptyScreen
 
-// ++RAM[0]
-@R0
+// ++RAM[pixelIndex]
+@pixelIndex
 MD=M+1          // increment the index
 
-@R1
-D=M-D           // i < length
+//   } while(RAM[screenEnd] > RAM[pixelIndex]);
+@screenEnd
+D=M-D           // D = screenEnd - pixelIndex
 @DOWHILE
-D; JGT
-//   while RAM[1] > RAM[0]
+D; JGT          // if(screenEnd > pixelIndex) goto DOWHILE
 
+// }
 // do-while is finished; jump to outer while loop:
 @WHILE
 0; JMP
