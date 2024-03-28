@@ -28,19 +28,21 @@ M=D
 
 // while(true):
 //   if(anyKeyPressed)
-@R2          // ROM[4]
+(WHILE)
+@R2
 M=-1            // RAM[2]=ffff  // fillScreen
 @R1
 A=M             // A=RAM[1]: keyboardMemoryMapAddress
 D=M             // D=RAM[RAM[1]]: keyboardScanKeyValue
-@13         // ROM addressing; address of the first line after the else statement
+@AFTERELSE
 D; JNE          // anyKeyPressed is true; skip else statement
 //   else       // if( ! anyKeyPressed)
 @R2
 M=0             // RAM[2]=0000  // emptyScreen
 
+(AFTERELSE)
 // RAM[0]= 16384
-@SCREEN       // ROM[13]
+@SCREEN
 D=A
 @R0
 M=D
@@ -51,7 +53,8 @@ M=D
 
 //   do
 //     RAM[RAM[0]]=RAM[2]
-@R2          // ROM[17]
+(DOWHILE)
+@R2
 D=M             // D=RAM[2]     // ffff or 0000
 @R0
 A=M             // A=RAM[0]
@@ -63,10 +66,10 @@ MD=M+1          // increment the index
 
 @R1
 D=M-D           // i < length
-@17         // ROM addressing; address of the first line of the do-while loop
+@DOWHILE
 D; JGT
 //   while RAM[1] > RAM[0]
 
 // do-while is finished; jump to outer while loop:
-@4          // ROM addressing; address of the first line of the while loop
+@WHILE
 0; JMP

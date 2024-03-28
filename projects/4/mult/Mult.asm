@@ -18,9 +18,10 @@
 M = 0
 
 // while --R0 >= 0
-@R0          // address of RAM[O] // this line is addressed by ROM[2]
+(WHILE)
+@R0
 MD=M-1      // R0--
-@12     // ROM addressing; address of the first line after the while loop
+@END
 D ; JLT     // if(R0<0) break;
 
 // R2=R1+R2
@@ -29,8 +30,9 @@ D=M         // D=R1
 @R2
 M=D+M       // R2=R1+R2
 
-@2      // ROM addressing; address of the first line of the while loop
+@WHILE
 0 ; JMP     // goto while
 
-@12         // this line is addressed by ROM[12]
+(END)
+@END
 0 ; JMP     // end with an infinite loop
