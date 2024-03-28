@@ -11,6 +11,7 @@
 // while R0 > 0
 //   R0 = R0 - 1
 //   R2 = R1 + R2
+// return           // simulated with an infinite loop
 
 // R2 = 0
 @R2
@@ -30,4 +31,6 @@ M=D+M       // R2=R1+R2
 
 @2      // ROM addressing; address of the first line of the while loop
 0 ; JMP     // goto while
-// this line is addressed by ROM[12]
+
+@12         // this line is addressed by ROM[12]
+0 ; JMP     // end with an infinite loop
