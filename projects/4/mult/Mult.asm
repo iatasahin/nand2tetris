@@ -13,19 +13,19 @@
 //   R2 = R1 + R2
 
 // R2 = 0
-@2
+@R2
 M = 0
 
 // while --R0 >= 0
-@0          // address of RAM[O] // this line is addressed by ROM[2]
+@R0          // address of RAM[O] // this line is addressed by ROM[2]
 MD=M-1      // R0--
 @12     // ROM addressing; address of the first line after the while loop
 D ; JLT     // if(R0<0) break;
 
 // R2=R1+R2
-@1          // address of R1
+@R1
 D=M         // D=R1
-@2          // address of R2
+@R2
 M=D+M       // R2=R1+R2
 
 @2      // ROM addressing; address of the first line of the while loop
