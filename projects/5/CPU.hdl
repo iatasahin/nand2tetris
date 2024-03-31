@@ -32,5 +32,45 @@ CHIP CPU {
         pc[15];          // address of next instruction
 
     PARTS:
-	//// Replace this comment with your code.
+	// The A-instruction
+    //   0 xxx xxxx xxxx xxxx
+    //   direct 15bit number assignment to ARegister
+    //   [15] is op-code, [0..14] is number to be assigned
+    //
+    // The C-instruction (computation[, assignment][, jump])
+    //   1??  a c1c2c3c4 c5c6d1d2 d3j1j2j3
+    //       12       8        4        0
+    //   [15] op-code, [13..14] not used,
+    //   comp bits: a c1c2c3c4c5c6 [6..12]
+    //   dest bits: d1d2d3         [3..5]
+    //   jump bits: j1j2j3         [0..2]
+
+    // A Register
+	Not(in=instruction[15],out=aInstruction);
+	And(a=instruction[15],b=instruction[5],out=cInstructionWithDestinationA);
+	Or(a=aInstruction,b=cInstructionWithDestinationA,out=writeToA);
+	Mux16(out=aIn,a=aluOut,b[0..14]=instruction[0..14],b[15]=false,sel=aInstruction);
+	ARegister(in=aIn,out=aReg,out[0..14]=addressM,load=writeToA);
+
+	// D Register
+	And(a=instruction[15],b=instruction[4],out=writeToD);
+	DRegister(in=aluOut,out=dReg,load=writeToD);
+
+	// Memory
+	And(a=instruction[15],b=instruction[3],out=writeM);
+
+	// Computation
+	Mux16(out=aRegOrM,a=aReg,b=inM,sel=instruction[12]);
+    //   The C-instruction (computation part)
+    //   a      c1    c2   c3     c4    c5     c6
+    //   ?M:A   D=0   !D   MA=0   !MA   ?+:&   no
+	ALU(x=dReg,y=aRegOrM,out=aluOut,out=outM,zr=zero,ng=negative,zx=instruction[11],nx=instruction[10],zy=instruction[9],ny=instruction[8],f=instruction[7],no=instruction[6]);
+
+	// Program Counter
+	Not16(in[0]=zero,out[0]=notZero,in[1]=negative,out[1]=notNegative);
+	And(a=notZero,b=notNegative,out=positive);
+    And16(out[0..2]=jumpBits,a[2]=negative,b[2]=instruction[2],a[1]=zero,b[1]=instruction[1],a[0]=positive,b[0]=instruction[0]);
+    Or8Way(in[0..2]=jumpBits,in[3..7]=false,out=jump);
+    And(a=instruction[15],b=jump,out=load);
+	PC(in=aReg,out[0..14]=pc,reset=reset,load=load,inc=true);
 }
