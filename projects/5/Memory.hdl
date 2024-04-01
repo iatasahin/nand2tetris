@@ -25,5 +25,27 @@ CHIP Memory {
     OUT out[16];
 
     PARTS:
-	//// Replace this comment with your code.
+    // Memory-Mapped Peripheral Addressing:
+    //              Address             Static Bits         Variable Bits
+    // RAM16K       [0..16383]          ![14]               [0..13]
+    // Screen       [16384..24575]      [14],![13]          [0..12]
+    // Keyboard     [24576]             [13,14],![0..12]    NA
+
+    // Select the memory mapped peripheral
+    Not(in=address[14],out=selectRam);
+    Not(in=address[13],out=not13);
+    And(a=address[14],b=not13,out=selectScreen);
+    Nand(a=address[13],b=address[14],out=n13and14);
+    Or16Way(in[0..12]=address[0..12],in[13]=n13and14,in[14..15]=false,out=notSelectKeyboard);
+    Not(in=notSelectKeyboard,out=selectKeyboard);
+    And(a=selectRam,b=load,out=writeRam);
+
+    // Peripheral chips
+    RAM16K(in=in,load=writeRam,address=address[0..13],out=ramOut);
+    Screen(in=in,load=selectScreen,address=address[0..12],out=screenOut);
+    Keyboard(out=keyboardOut);
+
+    // Select peripheral output
+    Mux16(out=screenOrKeyboardOut,sel=address[13],a=screenOut,b=keyboardOut);
+    Mux16(out=out,sel=address[14],a=ramOut,b=screenOrKeyboardOut);
 }
