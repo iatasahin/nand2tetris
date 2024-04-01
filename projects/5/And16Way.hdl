@@ -1,0 +1,17 @@
+// A helper chip for the project
+// File name: projects/5/And16Way.hdl
+/**
+ * 16-way And gate:
+ * out = in[0] And in[1] And ... And in[15]
+ */
+CHIP And16Way {
+    IN in[16];
+    OUT out;
+
+    PARTS:
+    // Implemented using 4 levels of And gates
+    And16(a[0..7]=in[0..7],b[0..7]=in[8..15],out[0..3]=andA4,out[4..7]=andB4);
+    And16(a[0..3]=andA4,b[0..3]=andB4,out[0..1]=andA2,out[2..3]=andB2);
+    And16(a[0..1]=andA2,b[0..1]=andB2,out[0]=andA,out[1]=andB);
+    And(a=andA,b=andB,out=out);
+}

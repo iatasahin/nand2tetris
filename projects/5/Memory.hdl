@@ -35,9 +35,8 @@ CHIP Memory {
     Not(in=address[14],out=selectRam);
     Not(in=address[13],out=not13);
     And(a=address[14],b=not13,out=selectScreen);
-    Nand(a=address[13],b=address[14],out=n13and14);
-    Or16Way(in[0..12]=address[0..12],in[13]=n13and14,in[14..15]=false,out=notSelectKeyboard);
-    Not(in=notSelectKeyboard,out=selectKeyboard);
+    Not16(in[0..12]=address[0..12],out[0..12]=not0to12);
+    And16Way(in[0..12]=not0to12,in[13..14]=address[13..14],in[15]=true,out=selectKeyboard);
     And(a=selectRam,b=load,out=writeRam);
 
     // Peripheral chips
