@@ -49,16 +49,16 @@ public class HackAssembler {
     }
 
     public static String parseAInstruction(String instruction) {
-        StringBuilder binaryHackAsText = new StringBuilder();
         int number = Integer.parseInt(instruction.substring(1));
-        for (int i = 1; i < (1 << 15); i *= 2) {
-            if ((number & i) == i)
-                binaryHackAsText.insert(0, "1");
-            else
-                binaryHackAsText.insert(0, "0");
-        }
-        binaryHackAsText.insert(0, "0");    // op-code
-        return binaryHackAsText.toString();
+        return "0" /* op-code */ + toZeroPadded15BitBinaryString(number);
+    }
+
+
+    public static String toZeroPadded15BitBinaryString(int number) {
+        StringBuilder numberString = new StringBuilder(Integer.toBinaryString(number));
+        while (numberString.length() < 15)
+            numberString.insert(0, "0");
+        return numberString.toString();
     }
 
     public static String parseCInstruction(String instruction) {
