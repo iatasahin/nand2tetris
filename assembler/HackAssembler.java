@@ -2,9 +2,26 @@ package assembler;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class HackAssembler {
+    private static final Map<String, Integer> symbolTable;
+
+    static {
+        symbolTable = new HashMap<>();
+        for (int i = 0; i < 16; i++)
+            symbolTable.put(("R" + i), i);
+        symbolTable.put("SCREEN", 16384);
+        symbolTable.put("KBD", 24576);
+        symbolTable.put("SP", 0);
+        symbolTable.put("LCL", 1);
+        symbolTable.put("ARG", 2);
+        symbolTable.put("THIS", 3);
+        symbolTable.put("THAT", 4);
+    }
+
     public static void main(String[] args) {
         if (!args[0].endsWith(".asm")) throw new RuntimeException("Filetype error: filetype should be .asm");
 
@@ -38,8 +55,56 @@ public class HackAssembler {
     }
 
     public static List<String> parseAssemblyToHack(List<String> assemblyString) {
+        List<String> labellessInstructions = resolveLabels(assemblyString);
+        List<String> symbollessInstructions = resolveSymbols(labellessInstructions);
+        return parseInstructions(symbollessInstructions);
+    }
+
+    // Records the line numbers of labels and removes the line they are defined
+    public static List<String> resolveLabels(List<String> assemblyWithLabels) {
+        List<String> result = new ArrayList<>();
+        int labellessInstructionIndex = 0;
+        for (String instruction : assemblyWithLabels) {
+            if (instruction.charAt(0) == '(') {
+                String label = instruction.substring(1, instruction.length() - 1);
+                symbolTable.put(label, labellessInstructionIndex);
+            } else {
+                result.add(instruction);
+                labellessInstructionIndex++;
+            }
+        }
+        return result;
+    }
+
+    // Upon first encounter, allocates memory to a variable.
+    // Converts labels and variables to referenced numbers.
+    public static List<String> resolveSymbols(List<String> assemblyWithSymbols) {
+        List<String> result = new ArrayList<>();
+        int avaliableRAMAddress = 16;
+        for (String instruction : assemblyWithSymbols) {
+            if (instruction.charAt(0) == '@') {
+                try{
+                    Integer.parseInt(instruction.substring(1));
+                    result.add(instruction);
+                } catch (NumberFormatException e) {
+                    String symbol = instruction.substring(1);
+                    Integer symbolValue = symbolTable.get(symbol);
+                    if(symbolValue == null){
+                        symbolValue = avaliableRAMAddress++;
+                        symbolTable.put(symbol, symbolValue);
+                    }
+                    result.add("@" + symbolValue);
+                }
+            } else {
+                result.add(instruction);
+            }
+        }
+        return result;
+    }
+
+    private static List<String> parseInstructions(List<String> symbollessInstructions) {
         final List<String> result = new ArrayList<>();
-        for (String instruction : assemblyString) {
+        for (String instruction : symbollessInstructions) {
             if (instruction.charAt(0) == '@')
                 result.add(parseAInstruction(instruction));
             else
@@ -49,8 +114,13 @@ public class HackAssembler {
     }
 
     public static String parseAInstruction(String instruction) {
-        int number = Integer.parseInt(instruction.substring(1));
-        return "0" /* op-code */ + toZeroPadded15BitBinaryString(number);
+        Integer symbolValue = symbolTable.get(instruction.substring(1));
+        if (symbolValue != null)
+            return "0" /* op-code */ + toZeroPadded15BitBinaryString(symbolValue);
+        else {
+            int number = Integer.parseInt(instruction.substring(1));
+            return "0" /* op-code */ + toZeroPadded15BitBinaryString(number);
+        }
     }
 
 
